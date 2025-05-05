@@ -4,6 +4,8 @@ from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
 from google.api_core.exceptions import ResourceExhausted
 from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -12,6 +14,7 @@ import pandas as pd
 df = pd.read_csv("data.csv")
 
 api_key=os.getenv("GOOGLE_API_KEY")
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
 # llm = ChatGoogleGenerativeAI(    
@@ -20,7 +23,7 @@ api_key=os.getenv("GOOGLE_API_KEY")
 #             temprature=0
 #             )
 llm = ChatOpenAI(
-    model="mistralai/mistral-7b-instruct",  # or any other supported model
+    model="meta-llama/llama-4-maverick:free",  # or any other supported model
     temperature=0
 )
 # llm = Ollama(model="mistral:latest")
@@ -37,9 +40,18 @@ agent = create_pandas_dataframe_agent(
 # question ="Summarize the data?"
 # response=agent.invoke(question)
 def generate_response(question):
-    # return agent.invoke(question)['output']
-    try:
-        return agent.invoke(question)['output']
-    except ResourceExhausted as e:
-        return "Rate limit reached. Try again later "
+     # Get chat history as messages
+    history = memory.load_memory_variables({})["chat_history"]
+    
+    # Combine chat history + new user input
+    full_input = {"input": question, "chat_history": history}
+    
+    # Run the agent
+    response = agent.invoke(full_input)
+    
+    # Update memory
+    memory.chat_memory.add_user_message(question)
+    memory.chat_memory.add_ai_message(response['output'])
+    
+    return response['output']
         
