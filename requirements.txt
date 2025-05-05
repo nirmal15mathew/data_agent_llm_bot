@@ -1,0 +1,7 @@
+flask
+flask-socketio
+eventlet
+langchain
+pandas
+langchain-experimental
+langchain-google-genai

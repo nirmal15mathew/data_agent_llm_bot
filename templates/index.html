@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Chatbot</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; display: flex; flex-direction: column; align-items: center; }
+    #chatbox { width: 400px; background: #fff; padding: 20px; border-radius: 10px; margin-top: 50px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .message { margin: 10px 0; }
+    .user { text-align: right; color: blue; }
+    .bot { text-align: left; color: green; }
+    #loading { font-style: italic; color: gray; }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <div id="messages"></div>
+    <div id="loading" style="display:none;">Bot is typing...</div>
+    <input id="input" type="text" placeholder="Type a message..." style="width: 100%; padding: 10px; margin-top: 10px;" />
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io(); // instead of "http://localhost:5000"
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const loading = document.getElementById('loading');
+
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && input.value.trim()) {
+        const userMsg = input.value.trim();
+        messages.innerHTML += `<div class="message user">${userMsg}</div>`;
+        loading.style.display = 'block';
+        socket.emit('user_message', { prompt: userMsg });
+        input.value = '';
+      }
+    });
+
+    socket.on('bot_response', data => {
+      loading.style.display = 'none';
+      messages.innerHTML += `<div class="message bot">${data.response}</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+</body>
+</html>
