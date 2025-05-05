@@ -6,3 +6,5 @@ pandas
 langchain-experimental
 langchain-google-genai
 tabulate
+openai
+langchain-community
