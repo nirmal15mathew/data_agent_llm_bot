@@ -1,8 +1,8 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.chat_models import ChatGoogleGenerativeAIError
+# from langchain.llms import Ollama
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
-
+from google.api_core.exceptions import ResourceExhausted
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -18,6 +18,7 @@ llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-pro",
             temprature=0
             )
+# llm = Ollama(model="mistral:latest")
 
 
 agent = create_pandas_dataframe_agent(
@@ -31,8 +32,9 @@ agent = create_pandas_dataframe_agent(
 # question ="Summarize the data?"
 # response=agent.invoke(question)
 def generate_response(question):
+    # return agent.invoke(question)['output']
     try:
         return agent.invoke(question)['output']
-    except ChatGoogleGenerativeAIError as e:
-        return "Rate limit reached. Try again later " + e
+    except ResourceExhausted as e:
+        return "Rate limit reached. Try again later "
         
