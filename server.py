@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import time
+from main import generate_response
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -15,7 +16,7 @@ def index():
 
 @socketio.on('user_message')
 def handle_user_message(data):
-    response = get_bot_response(data['prompt'])
+    response = generate_response(data['prompt'])['output']
     emit('bot_response', {'response': response})
 
 if __name__ == '__main__':
