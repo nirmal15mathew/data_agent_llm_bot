@@ -16,7 +16,7 @@ def index():
 
 @socketio.on('user_message')
 def handle_user_message(data):
-    response = generate_response(data['prompt'])['output']
+    response = generate_response(data['prompt'])
     emit('bot_response', {'response': response})
 
 if __name__ == '__main__':
