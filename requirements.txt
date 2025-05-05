@@ -5,3 +5,4 @@ langchain
 pandas
 langchain-experimental
 langchain-google-genai
+tabulate
