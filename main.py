@@ -3,6 +3,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
 from google.api_core.exceptions import ResourceExhausted
+from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -13,11 +14,15 @@ df = pd.read_csv("data.csv")
 api_key=os.getenv("GOOGLE_API_KEY")
 
 
-llm = ChatGoogleGenerativeAI(    
-            google_api_key=api_key, 
-            model="gemini-1.5-pro",
-            temprature=0
-            )
+# llm = ChatGoogleGenerativeAI(    
+#             google_api_key=api_key, 
+#             model="gemini-1.5-pro",
+#             temprature=0
+#             )
+llm = ChatOpenAI(
+    model="mistralai/mistral-7b-instruct",  # or any other supported model
+    temperature=0
+)
 # llm = Ollama(model="mistral:latest")
 
 
