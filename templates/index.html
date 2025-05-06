@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Realtor Bot</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
+
 <body class="bg-gray-100 h-screen w-screen overflow-hidden">
 
   <div x-data="chatbot()" x-init="init" class="flex flex-col h-full relative">
 
     <!-- Header with status -->
-    <header class="bg-white shadow-md p-4 text-xl font-semibold text-gray-800 flex items-center justify-between shadow-lg">
+    <header
+      class="bg-white shadow-md p-4 text-xl font-semibold text-gray-800 flex items-center justify-between shadow-lg">
       <span>Realtor Bot</span>
       <div class="flex items-center gap-2 text-sm">
         <span x-text="isConnected ? 'Online' : 'Offline'"></span>
-        <div
-          class="w-3 h-3 rounded-full"
-          :class="isConnected ? 'bg-green-500' : 'bg-red-500'"
-        ></div>
+        <div class="w-3 h-3 rounded-full" :class="isConnected ? 'bg-green-500' : 'bg-red-500'"></div>
       </div>
     </header>
 
     <!-- Messages -->
-    <main class="flex-1 overflow-y-auto px-4 py-6 space-y-3 bg-gray-50" id="chat-messages">
+    <main class="flex-1 overflow-y-auto px-4 py-6 space-y-3 bg-gray-50 min-h-0" id="chat-messages">
       <template x-for="(msg, index) in messages" :key="index">
         <div :class="msg.from === 'user' ? 'flex justify-end' : 'flex justify-start'">
-          <div
-            class="px-4 py-2 rounded-xl max-w-[75%] break-words text-sm shadow-sm"
-            :class="msg.from === 'user'
+          <div class="px-4 py-2 rounded-xl max-w-[75%] break-words text-sm shadow-sm" :class="msg.from === 'user'
               ? 'bg-blue-600 text-white rounded-br-none'
-              : 'bg-white text-gray-800 border rounded-bl-none'"
-            x-text="msg.text"
-          ></div>
+              : 'bg-white text-gray-800 border rounded-bl-none'" x-text="msg.text"></div>
         </div>
       </template>
 
@@ -48,32 +45,22 @@
     </main>
 
     <!-- Input Box -->
-    <footer class="p-4 bg-white shadow-lg">
+    <footer class="sticky bottom-0 z-10 p-4 bg-white shadow-lg">
       <form @submit.prevent="sendMessage" class="flex gap-2">
-        <input
-          type="text"
-          x-model="input"
-          :disabled="botBusy || !isConnected"
+        <input x-ref="userInput" type="text" x-model="input" :disabled="botBusy || !isConnected"
           placeholder="Ask about properties, prices, or neighborhoods..."
-          class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <button
-          type="submit"
-          :disabled="botBusy || !isConnected"
-          class="px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+          class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed" />
+        <button type="submit" :disabled="botBusy || !isConnected"
+          class="px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
           Send
         </button>
       </form>
     </footer>
 
     <!-- Toast -->
-    <div
-      x-show="showToast"
-      x-transition
+    <div x-show="showToast" x-transition
       class="absolute bottom-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg"
-      x-text="toastMessage"
-    ></div>
+      x-text="toastMessage"></div>
   </div>
 
   <script>
@@ -91,6 +78,9 @@
         init() {
           this.socket = io();
 
+          // Focus the input on load
+          this.$nextTick(() => this.$refs.userInput?.focus());
+
           this.socket.on('connect', () => {
             this.isConnected = true;
           });
@@ -104,10 +94,11 @@
             this.messages.push({ from: 'bot', text: data.response });
             this.botState = data.state || 'done';
             this.botBusy = false;
-
             this.scrollToBottom();
+            this.$nextTick(() => this.$refs.userInput?.focus());
           });
         },
+
 
         sendMessage() {
           if (!this.input.trim() || this.botBusy || !this.isConnected) return;
@@ -139,4 +130,5 @@
     }
   </script>
 </body>
+
 </html>
