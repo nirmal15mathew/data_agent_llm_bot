@@ -14,6 +14,7 @@ import pandas as pd
 df = pd.read_csv("data.csv")
 
 api_key=os.getenv("GOOGLE_API_KEY")
+
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
@@ -34,7 +35,9 @@ agent = create_pandas_dataframe_agent(
     df,
     verbose=True,
     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    allow_dangerous_code=True
+    allow_dangerous_code=True,
+    prefix="This dataset contains the house prices in different counties in the us. You are a real estate financial expert. Use it to answer questions more accurately. Never give an output as code to the user. Only provide analysis. Provide explicit data only if asked. If you are unable to answer due to an error or insufficient data, state such in the response and stop.",
+    handle_parsing_errors=True
     )
 
 # question ="Summarize the data?"
@@ -46,12 +49,18 @@ def generate_response(question):
     # Combine chat history + new user input
     full_input = {"input": question, "chat_history": history}
     
-    # Run the agent
-    response = agent.invoke(full_input)
-    
-    # Update memory
-    memory.chat_memory.add_user_message(question)
-    memory.chat_memory.add_ai_message(response['output'])
-    
-    return response['output']
+    try:
+        # Run the agent
+        response = agent.invoke(full_input)
+
+        # Update memory
+        memory.chat_memory.add_user_message(question)
+        memory.chat_memory.add_ai_message(response['output'])
+
+        return response['output']
+    except ResourceExhausted as e:
+        return 'Qouta Reached. Try again later'
         
+if __name__ == "__main__":
+    q = input("Enter query: ")
+    print(generate_response(q))
